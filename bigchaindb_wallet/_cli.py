@@ -104,7 +104,7 @@ def prepare(name, address, index, password, asset, metadata, indent, operation):
             prepared_creation_tx,
             private_keys=[b58encode(key.privkey).decode()]
         )
-        click.echo(json.dumps(tx, indent=4 if indent else False))
+        click.echo(json.dumps(tx, indent=4 if indent else None))
     # TODO ks.WalletError decorator
     except ks.WalletError as error:
         click.echo(error)
