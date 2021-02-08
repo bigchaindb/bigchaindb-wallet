@@ -105,32 +105,30 @@ def session_wallet(tmp_home_session, default_wallet):
 @pytest.fixture
 def fulfilled_hello_world_tx():
     return {
-        'id': 'afd0396114d0a7665e81f15d0b6d879f0b31ca1f31bd48531f3452fa2f1e8b55',
-        'version': '2.0',
         'inputs': [{
-            'fulfillment': 'pGSAIG3OrWZAcCnyIOLKUpD_pEtiZA2Gp-WEZ3q8HVsyIQ32gUD'
-            'ae96exzWKHtk6ZYLVDIep9k95PwJJ9EbJG8VYohCrTZd7eVygcFCSpYhv0i850Qgnb'
-            'fpTuWtnG-vdIwq3FoK',
+            'owners_before': ['4gjzAZFZdVVwDYPsQqAnqgyvsjfRZQg8PRfw2CfsZvDn'],
             'fulfills': None,
-            'owners_before': [
-                '8PeE5jSaqnyd79qoobNPxQDf2S9sF4arMQR8DiQypQKo'
-            ]
+            'fulfillment': ('pGSAIDbBUPlebdNkDx9joFcxPwb_vOaYwaoC9_xuVTDWg4R5gU'
+                            'CpRvdsk6GZ9D1GM3kHl14ToL1VE8876d7p9UifgGei9qR9kMhl'
+                            'frDbHJYiRWeRhXCCSedsxDqqSq9SpkJmgPgL')
         }],
-        'operation': 'CREATE',
         'outputs': [{
-            'amount': '1',
+            'public_keys': ['4gjzAZFZdVVwDYPsQqAnqgyvsjfRZQg8PRfw2CfsZvDn'],
             'condition': {
                 'details': {
-                    'public_key': '8PeE5jSaqnyd79qoobNPxQDf2S9sF4arMQR8DiQypQKo',
-                    'type': 'ed25519-sha-256'
+                    'type': 'ed25519-sha-256',
+                    'public_key': '4gjzAZFZdVVwDYPsQqAnqgyvsjfRZQg8PRfw2CfsZvDn'
                 },
-                'uri': 'ni:///sha-256;5Xu5GNYzydF5AIGPoz3fSkniUzJzuj913XTOvPXTU'
-                '-k?fpt=ed25519-sha-256&cost=131072'
+                'uri': ('ni:///sha-256;DonGbwxLlRWhG4nl_DFlLx9V6EzQEdbTUivzAU8m'
+                        'YdQ?fpt=ed25519-sha-256&cost=131072')
             },
-            'public_keys': ['8PeE5jSaqnyd79qoobNPxQDf2S9sF4arMQR8DiQypQKo']
+            'amount': '1'
         }],
-        'asset': {'data': {'hello': 'world'}},
+        'operation': 'CREATE',
         'metadata': {'meta': 'someta'},
+        'asset': {'data': {'hello': 'world'}},
+        'version': '2.0',
+        'id': 'c008a67793551c4ad060f059885a5b44397a196a0592a160d1eb5703436430e4'
     }
 
 

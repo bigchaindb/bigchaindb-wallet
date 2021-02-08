@@ -84,19 +84,22 @@ def init(strength, entropy, mnemonic_language, no_keystore, location,
 @click.option('-a', '--address', default=0, type=int, help='Address to use')
 @click.option('-i', '--index', default=0, type=int, help='Address index')
 @click.option('-p', '--password', type=str, help='Root account password')
+@click.option('-A', '--operation', type=str, help='Operation CREATE/TRANSFER', required=True)
 @click.option('-A', '--asset', type=str, help='Asset')
 @click.option('-M', '--metadata', type=str, help='Metadata')
 @click.option('-I', '--indent', type=bool, help='Indent result', is_flag=True)
-def create(name, address, index, password, asset, metadata, indent):
-    key = ks.get_private_key_drv(name, address, index, password)
-    bdb = BigchainDB()
-    prepared_creation_tx = bdb.transactions.prepare(
-        operation='CREATE',
-        signers=b58encode(km.privkey_to_pubkey(key.privkey)[1:]).decode(),
-        asset=json.loads(asset),
-        metadata=json.loads(metadata),
-    )
+def prepare(name, address, index, password, asset, metadata, indent, operation):
     try:
+        if not operation.upper() in ['CREATE', 'TRANSFER']:
+            raise ks.WalletError('Operation should be either CREATE or TRANSFER')
+        key = ks.get_private_key_drv(name, address, index, password)
+        bdb = BigchainDB()
+        prepared_creation_tx = bdb.transactions.prepare(
+            operation=operation.upper(),
+            signers=b58encode(km.privkey_to_pubkey(key.privkey)[1:]).decode(),
+            asset=json.loads(asset),
+            metadata=json.loads(metadata),
+        )
         tx = fulfill_transaction(
             prepared_creation_tx,
             private_keys=[b58encode(key.privkey).decode()]
