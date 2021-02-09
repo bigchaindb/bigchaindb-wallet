@@ -7,6 +7,7 @@ from bigchaindb_driver import BigchainDB
 
 import bigchaindb_wallet.keymanagement as km
 import bigchaindb_wallet.keystore as ks
+from base58 import b58encode
 
 @click.group()
 def cli():
@@ -91,14 +92,14 @@ def create(name, address, index, password, asset, metadata, indent):
     bdb = BigchainDB()
     prepared_creation_tx = bdb.transactions.prepare(
         operation='CREATE',
-        signers=km.privkey_to_pubkey(key.privkey),
-        assertt=json.loads(asset),
+        signers=b58encode(km.privkey_to_pubkey(key.privkey)[1:]).decode(),
+        asset=json.loads(asset),
         metadata=json.loads(metadata),
     )
     try:
         tx = fulfill_transaction(
             prepared_creation_tx,
-            private_keys=[key.privkey]
+            private_keys=[b58encode(key.privkey).decode()]
         )
         click.echo(json.dumps(tx, indent=4 if indent else False))
     # TODO ks.WalletError decorator
@@ -122,7 +123,7 @@ def sign(name, address, password, index):
         xprivkey = ks.get_private_key_drv(name, address, index, password)
         tx = fulfill_transaction(
             json.loads(click.get_binary_stream('stdin').encode()),
-            private_keys=[xprivkey.privkey]
+            private_keys=[b58encode(xprivkey.privkey).decode()]
         )
         click.echo(json.dumps(tx))
     # TODO ks.WalletError decorator
