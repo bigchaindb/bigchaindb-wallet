@@ -80,13 +80,13 @@ def init(strength, entropy, mnemonic_language, no_keystore, location,
 
 
 @cli.command()
-@click.option('-n', '--name', type=str, help='Wallet to use')
+@click.option('-n', '--name', type=str, help='Wallet to use', default='default')
 @click.option('-a', '--address', default=0, type=int, help='Address to use')
 @click.option('-i', '--index', default=0, type=int, help='Address index')
-@click.option('-p', '--password', type=str, help='Root account password')
+@click.option('-p', '--password', type=str, help='Root account password', required=True)
 @click.option('-A', '--operation', type=str, help='Operation CREATE/TRANSFER', required=True)
-@click.option('-A', '--asset', type=str, help='Asset')
-@click.option('-M', '--metadata', type=str, help='Metadata')
+@click.option('-A', '--asset', type=str, help='Asset', required=True)
+@click.option('-M', '--metadata', type=str, help='Metadata', default='{}')
 @click.option('-I', '--indent', type=bool, help='Indent result', is_flag=True)
 def prepare(name, address, index, password, asset, metadata, indent, operation):
     try:
