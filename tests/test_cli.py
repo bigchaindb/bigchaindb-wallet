@@ -1,26 +1,31 @@
 """CLI Tests"""
 import pytest
 import json
+import random
 from schema import Schema
 from bigchaindb_wallet import _cli as cli
+from bigchaindb_wallet.keystore import bdbw_derive_account, get_private_key_drv
+from bigchaindb_wallet.keymanagement import ExtendedKey
+import hypothesis.strategies as st
+from hypothesis import given, example, settings
 
 
-def test__get_private_key_drv_bdb_master(session_wallet,
-                                         default_password,
-                                         bdbw_master_xkey):
+@pytest.mark.parametrize(
+    "account,index",
+    [(0, 0), (1, 1), (10, 10), (123, 123), (999, 999), (1, 4849),
+     (4849, 1), (0x8000000, 0x8000000), (0xfffffff, 0xfffffff)])
+def test__get_private_key_drv(
+        session_wallet,
+        default_password,
+        keymanagement_test_vectors,
+        account,
+        index
+):
     # TODO test raises
-    # TODO teset bdb keys
-    key_drv = cli._get_private_key_drv('default', 0, 0, default_password)
-    assert key_drv._xkey.get_master_xpriv() == bdbw_master_xkey.privkey
-
-
-def test__get_public_key_drv(session_wallet,
-                             default_password,
-                             bdbw_master_xkey):
-    # TODO test raises
-    # TODO teset bdb keys
-    key_drv = cli._get_public_key_drv('default', 0, 0, default_password)
-    assert key_drv._xkey.get_master_xpub() == bdbw_master_xkey.pubkey
+    key_drv = get_private_key_drv('default', account, index, default_password)
+    test_xkey = ExtendedKey(keymanagement_test_vectors.privkey,
+                            keymanagement_test_vectors.chaincode)
+    assert key_drv == bdbw_derive_account(test_xkey, account, index)
 
 
 def test_cli_init_default(tmp_home, click_runner):
@@ -51,7 +56,12 @@ def test_cli_init_default(tmp_home, click_runner):
 
 
 @pytest.mark.skip
-def test_cli_create(click_runner, session_wallet, default_password, fulfilled_hello_world_tx):
+def test_cli_create(
+        click_runner,
+        session_wallet,
+        default_password,
+        fulfilled_hello_world_tx
+):
     result = [click_runner.invoke(
         cli.create,
         ["--name", "default",

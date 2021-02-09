@@ -1,10 +1,7 @@
 """Test wallet"""
 import pytest
-from bigchaindb_wallet.wallet import (
-    _encrypt_master_privkey,
-    _decrypt_master_privkey,
-    get_master_privkey
-)
+from bigchaindb_wallet.keymanagement import symkey_encrypt, symkey_decrypt
+from bigchaindb_wallet.keystore import get_master_xprivkey
 
 
 @pytest.mark.parametrize(
@@ -15,13 +12,14 @@ from bigchaindb_wallet.wallet import (
      (b'\x00', b'\x00'),
      (b'\xff' * 10, b'\xff' * 10)])
 def test_can_decrypt(msg, password):
-    crypt, salt = _encrypt_master_privkey(msg, password)
-    decr = _decrypt_master_privkey(crypt, password, salt)
+    crypt, salt = symkey_encrypt(msg, password)
+    decr = symkey_decrypt(crypt, password, salt)
     assert decr == msg
 
 
-def test_get_master_privkey(default_wallet, default_password, master_xpriv):
-    xprivkey = get_master_privkey(
+def test_get_master_privkey(default_wallet, default_password, keymanagement_test_vectors):
+    xprivkey = get_master_xprivkey(
         default_wallet, 'default', default_password
     )
-    assert master_xpriv == xprivkey
+    assert keymanagement_test_vectors.privkey == xprivkey.privkey
+    assert keymanagement_test_vectors.chaincode == xprivkey.chaincode

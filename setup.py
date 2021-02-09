@@ -11,14 +11,13 @@ setup(
     url="https://github.com/bigchaindb/bigchaindb_wallet",
     packages=["bigchaindb_wallet"],
     py_modules=[
-        "bigchaindb_wallet.wallet",
+        "bigchaindb_wallet.keystore",
         "bigchaindb_wallet._cli"
     ],
     install_requires=[
         "Click",
         "PyNaCl",
         "bigchaindb_driver",
-        "bip32",
         "mnemonic",
     ],
     entry_points='''
