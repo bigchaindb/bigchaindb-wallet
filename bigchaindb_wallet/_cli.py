@@ -65,13 +65,15 @@ def init(strength, entropy, mnemonic_language, no_keystore, location,
             if not location:
                 location = '{}/{}'.format(ks.get_home_path_and_warn(),
                                           ks.DEFAULT_KEYSTORE_FILENAME)
-                ks.wallet_dump(wallet, location)
+            else:
+                location = ks.DEFAULT_KEYSTORE_FILENAME
+            ks.wallet_dump(wallet, location)
         if quiet:
             click.echo(mnemonic_phrase)
         else:
-            click.echo('Keystore initialized in {}'.format(location))
-            click.echo('Your mnemonic phrase is \n{}'
-                       'Keep it in a safe place'.format(mnemonic_phrase))
+            click.echo('Keystore initialized in {}:'.format(location))
+            click.echo('Your mnemonic phrase is \n{}\n'
+                       'Keep it in a safe place!'.format(mnemonic_phrase))
             # TODO ks.WalletError decorator
     except ks.WalletError as error:
         click.echo(error)
