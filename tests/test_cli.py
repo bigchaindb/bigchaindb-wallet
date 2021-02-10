@@ -55,20 +55,20 @@ def test_cli_init_default(tmp_home, click_runner):
         .format(conf_location))
 
 
-@pytest.mark.skip
-def test_cli_create(
+def test_cli_prepare(
         click_runner,
         session_wallet,
         default_password,
         fulfilled_hello_world_tx
 ):
-    result = [click_runner.invoke(
-        cli.create,
+    result = click_runner.invoke(
+        cli.prepare,
         ["--name", "default",
          "--address", "3",
          "--index", "3",
+         "--operation", "cReAte",
          "--password", default_password,
          "--asset", '{"data":{"hello":"world"}}',
          '--metadata', '{"meta":"someta"}']
-    ) for i in range(3)]
+    )
     assert json.loads(result.output) == fulfilled_hello_world_tx
