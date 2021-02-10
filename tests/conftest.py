@@ -1,12 +1,11 @@
 """BigchainDB wallet conftest"""
 import json
 import os
-from collections import namedtuple
-from types import SimpleNamespace
-
 import pytest
+from types import SimpleNamespace
+from collections import namedtuple
+
 from base58 import b58encode
-from bip32 import BIP32
 from click.testing import CliRunner
 
 from bigchaindb_wallet.keystore import BDBW_PATH_TEMPLATE
