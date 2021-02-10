@@ -3,6 +3,7 @@ import json
 import os
 import pytest
 from types import SimpleNamespace
+from schema import Schema, Use
 from collections import namedtuple
 
 from base58 import b58encode
@@ -100,16 +101,13 @@ def session_wallet(tmp_home_session, default_wallet):
     return tmp_home_session
 
 
-@pytest.mark.skip
 @pytest.fixture
-def fulfilled_hello_world_tx():
+def prepared_hello_world_tx():
     return {
         'inputs': [{
             'owners_before': ['4gjzAZFZdVVwDYPsQqAnqgyvsjfRZQg8PRfw2CfsZvDn'],
             'fulfills': None,
-            'fulfillment': ('pGSAIDbBUPlebdNkDx9joFcxPwb_vOaYwaoC9_xuVTDWg4R5gU'
-                            'CpRvdsk6GZ9D1GM3kHl14ToL1VE8876d7p9UifgGei9qR9kMhl'
-                            'frDbHJYiRWeRhXCCSedsxDqqSq9SpkJmgPgL')
+            'fulfillment': None
         }],
         'outputs': [{
             'public_keys': ['4gjzAZFZdVVwDYPsQqAnqgyvsjfRZQg8PRfw2CfsZvDn'],
@@ -127,8 +125,28 @@ def fulfilled_hello_world_tx():
         'metadata': {'meta': 'someta'},
         'asset': {'data': {'hello': 'world'}},
         'version': '2.0',
-        'id': 'c008a67793551c4ad060f059885a5b44397a196a0592a160d1eb5703436430e4'
+        'id': None
     }
+
+
+@pytest.fixture
+def fulfilled_hello_world_tx(prepared_hello_world_tx):
+    """Place desired values in pattern matching style to create prepared tx"""
+    return Schema({
+        'inputs': [{
+            'fulfillment': Use(
+                lambda _: ('pGSAIDbBUPlebdNkDx9joFcxPwb_vOaYwaoC9_xuVTDWg4R5gU'
+                           'CpRvdsk6GZ9D1GM3kHl14ToL1VE8876d7p9UifgGei9qR9kMhl'
+                           'frDbHJYiRWeRhXCCSedsxDqqSq9SpkJmgPgL')
+            ),
+            str: object
+        }],
+        'id': Use(
+            lambda _:
+            'c008a67793551c4ad060f059885a5b44397a196a0592a160d1eb5703436430e4'
+        ),
+        str: object
+    }).validate(prepared_hello_world_tx)
 
 
 @pytest.fixture
