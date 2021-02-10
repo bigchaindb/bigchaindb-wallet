@@ -15,35 +15,22 @@ def cli():
 
 
 @cli.command()
-@click.option(
-    '-s', '--strength', type=int, default=256,
-    help=('Seed strength. One of the following [128, 160, 192, 224, 256]'
-          ' default is 256')
-)
-@click.option(
-    '-p', '--password', type=str, required=True,
-    help=('Wallet master password.  Used to encrypt private keys'))
-@click.option(
-    '-e', '--entropy', type=str,
-    help='Entropy to use for seed generation. It must be hex encoded'
-)
-@click.option(
-    '-l', '--mnemonic-language', type=str, default='english',
-    help=('Mnemonic language. Currengly supported languages: '
-          '[cinese-simplified, chinese-traditional, english, french, italian, '
-          'japanese, korean, spanish]')
-)
-@click.option(
-    '-o', '--no-keystore', type=bool, is_flag=True,
-    help=('Do not create keystore file. Ouput result to stdout'))
-@click.option(
-    '-q', '--quiet', type=bool, is_flag=True,
-    help=('Only ouput the resulting mnemonic seed')
-)
-@click.option(
-    '-L', '--location',
-    help=('Keystore file location')
-)
+@click.option('-s', '--strength', type=int, default=256,
+              help=('Seed strength. One of the following '
+                    '[128, 160, 192, 224, 256] default is 256'))
+@click.option('-p', '--password', type=str, required=True,
+              help=('Wallet master password.  Used to encrypt private keys'))
+@click.option('-e', '--entropy', type=str,
+              help='Entropy to use for seed generation. It must be hex encoded')
+@click.option('-l', '--mnemonic-language', type=str, default='english',
+              help=('Mnemonic language. Currengly supported languages: '
+                    '[cinese-simplified, chinese-traditional, english, french, '
+                    'italian, japanese, korean, spanish]'))
+@click.option('-o', '--no-keystore', type=bool, is_flag=True,
+              help=('Do not create keystore file. Ouput result to stdout'))
+@click.option('-q', '--quiet', type=bool, is_flag=True,
+              help=('Only ouput the resulting mnemonic seed'))
+@click.option('-L', '--location', help=('Keystore file location'))
 def init(strength, entropy, mnemonic_language, no_keystore, location,
          password, quiet):
     # TODO make OS checks
