@@ -3,6 +3,7 @@ import pytest
 import json
 import random
 from schema import Schema
+from bigchaindb_driver import BigchainDB
 from bigchaindb_wallet import _cli as cli
 from bigchaindb_wallet.keystore import bdbw_derive_account, get_private_key_drv
 from bigchaindb_wallet.keymanagement import ExtendedKey
@@ -94,3 +95,12 @@ def test_cli_fulfill(
         ]
     )
     assert json.loads(result.output) == fulfilled_hello_world_tx
+
+
+def test_cli_commit(random_fulfilled_tx_gen, bdb_test_url, click_runner):
+    bdb = BigchainDB(bdb_test_url)
+    ftx = random_fulfilled_tx_gen(bdb)
+    result = click_runner.invoke(
+        cli.commit, ["--transaction", json.dumps(ftx), "--url", bdb_test_url]
+    )
+    assert json.loads(result.output) == ftx

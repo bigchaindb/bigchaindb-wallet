@@ -1,12 +1,18 @@
 """BigchainDB wallet conftest"""
 import json
 import os
+import random
+import string
+
 import pytest
+
 from types import SimpleNamespace
 from schema import Schema, Use
 from collections import namedtuple
 
 from base58 import b58encode
+from bigchaindb_driver import BigchainDB
+from bigchaindb_driver.crypto import generate_keypair
 from click.testing import CliRunner
 
 from bigchaindb_wallet.keystore import BDBW_PATH_TEMPLATE
@@ -150,6 +156,36 @@ def fulfilled_hello_world_tx(prepared_hello_world_tx):
         ),
         str: object
     }).validate(prepared_hello_world_tx)
+
+
+@pytest.fixture
+def bdb_test_url():
+    return 'https://test.ipdb.io'
+
+
+@pytest.fixture
+def random_fulfilled_tx_gen():
+    def closure(bdb):
+        alice = generate_keypair()
+        prepared_creation_tx = bdb.transactions.prepare(
+            operation='CREATE',
+            signers=alice.public_key,
+            asset={
+                'data': {
+                    'bicycle': {
+                        'serial_number': ''.join(random.sample(string.hexdigits, 20)),
+                        'manufacturer': 'bkfab',
+                    },
+                },
+            },
+            metadata={'planet': 'earth'},
+        )
+        fulfilled_creation_tx = bdb.transactions.fulfill(
+            prepared_creation_tx,
+            private_keys=alice.private_key
+        )
+        return fulfilled_creation_tx
+    return closure
 
 
 @pytest.fixture
