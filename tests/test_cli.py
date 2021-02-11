@@ -59,16 +59,38 @@ def test_cli_prepare(
         click_runner,
         session_wallet,
         default_password,
-        fulfilled_hello_world_tx
+        prepared_hello_world_tx,
 ):
     result = click_runner.invoke(
         cli.prepare,
-        ["--name", "default",
-         "--address", "3",
-         "--index", "3",
-         "--operation", "cReAte",
-         "--password", default_password,
-         "--asset", '{"data":{"hello":"world"}}',
-         '--metadata', '{"meta":"someta"}']
+        [
+            "--wallet", "default",
+            "--address", "3",
+            "--index", "3",
+            "--operation", "cReAte",
+            "--password", default_password,
+            "--asset", '{"data":{"hello":"world"}}',
+            '--metadata', '{"meta":"someta"}'
+        ]
+    )
+    assert json.loads(result.output) == prepared_hello_world_tx
+
+
+def test_cli_fulfill(
+        click_runner,
+        session_wallet,
+        default_password,
+        prepared_hello_world_tx,
+        fulfilled_hello_world_tx
+):
+    result = click_runner.invoke(
+        cli.fulfill,
+        [
+            "--wallet", "default",
+            "--address", "3",
+            "--index", "3",
+            "--password", default_password,
+            "--transaction", json.dumps(prepared_hello_world_tx)
+        ]
     )
     assert json.loads(result.output) == fulfilled_hello_world_tx

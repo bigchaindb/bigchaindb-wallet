@@ -9,17 +9,55 @@ import bigchaindb_wallet.keymanagement as km
 import bigchaindb_wallet.keystore as ks
 from base58 import b58encode
 
+
+# Decoratoers
+_wallet = click.option(
+    '-w', '--wallet',
+    help='Wallet to use',
+    type=str,
+    default=lambda: os.environ.get('BDBW_WALLET_NAME', 'default'),
+)
+
+_address = click.option(
+    '-a', '--address',
+    help='Address to use',
+    type=int,
+    default=lambda: os.environ.get('BDBW_ACCOUNT_IDX', 0)
+)
+
+_index = click.option(
+    '-i', '--index',
+    help='Address index',
+    type=int,
+    default=lambda: os.environ.get('BDBW_ADDRESS_IDX', 0)
+)
+
+_password = click.option(
+    '-p', '--password',
+    help='Wallet master password.  Used to encrypt and decrypt private keys',
+    type=str,
+    default=lambda: os.environ.get('BDBW_PASSWORD')
+)
+
+
+_location = click.option(
+    '-L', '--location',
+    help=('Keystore file location'),
+    default=ks.get_home_path_and_warn
+)
+
+
+# CLI
 @click.group()
 def cli():
     return
 
 
 @cli.command()
+@_password
 @click.option('-s', '--strength', type=int, default=256,
               help=('Seed strength. One of the following '
                     '[128, 160, 192, 224, 256] default is 256'))
-@click.option('-p', '--password', type=str, required=True,
-              help=('Wallet master password.  Used to encrypt private keys'))
 @click.option('-e', '--entropy', type=str,
               help='Entropy to use for seed generation. It must be hex encoded')
 @click.option('-l', '--mnemonic-language', type=str, default='english',
@@ -30,7 +68,7 @@ def cli():
               help=('Do not create keystore file. Ouput result to stdout'))
 @click.option('-q', '--quiet', type=bool, is_flag=True,
               help=('Only ouput the resulting mnemonic seed'))
-@click.option('-L', '--location', help=('Keystore file location'))
+
 def init(strength, entropy, mnemonic_language, no_keystore, location,
          password, quiet):
     # TODO make OS checks
@@ -69,19 +107,20 @@ def init(strength, entropy, mnemonic_language, no_keystore, location,
 
 
 @cli.command()
-@click.option('-n', '--name', type=str, help='Wallet to use', default='default')
-@click.option('-a', '--address', default=0, type=int, help='Address to use')
-@click.option('-i', '--index', default=0, type=int, help='Address index')
-@click.option('-p', '--password', type=str, help='Root account password', required=True)
-@click.option('-A', '--operation', type=str, help='Operation CREATE/TRANSFER', required=True)
+@_wallet
+@_address
+@_index
+@_password
+@click.option('-A', '--operation',
+              type=str, help='Operation CREATE/TRANSFER', required=True)
 @click.option('-A', '--asset', type=str, help='Asset', required=True)
 @click.option('-M', '--metadata', type=str, help='Metadata', default='{}')
 @click.option('-I', '--indent', type=bool, help='Indent result', is_flag=True)
-def prepare(name, address, index, password, asset, metadata, indent, operation):
+def prepare(wallet, address, index, password, asset, metadata, indent, operation):
     try:
         if not operation.upper() in ['CREATE', 'TRANSFER']:
             raise ks.WalletError('Operation should be either CREATE or TRANSFER')
-        key = ks.get_private_key_drv(name, address, index, password)
+        key = ks.get_private_key_drv(wallet, address, index, password)
         bdb = BigchainDB()
         prepared_creation_tx = bdb.transactions.prepare(
             operation=operation.upper(),
@@ -89,12 +128,10 @@ def prepare(name, address, index, password, asset, metadata, indent, operation):
             asset=json.loads(asset),
             metadata=json.loads(metadata),
         )
-        tx = fulfill_transaction(
-            prepared_creation_tx,
-            private_keys=[b58encode(key.privkey).decode()]
+        click.echo(
+            json.dumps(prepared_creation_tx, indent=4 if indent else None)
         )
-        click.echo(json.dumps(tx, indent=4 if indent else None))
-    # TODO ks.WalletError decorator
+        # TODO ks.WalletError decorator
     except ks.WalletError as error:
         click.echo(error)
     except json.JSONDecodeError:
@@ -103,19 +140,19 @@ def prepare(name, address, index, password, asset, metadata, indent, operation):
         click.echo('Operation aborted: unrecoverable error: {}'.format(err))
 
 
-# TODO address aliases?
-# TODO add option to use the derivation path?
 @cli.command()
-@click.option('-n', '--name', type=str, help='Wallet to use')
-@click.option('-a', '--address', default=0, type=int, help='Address to use')
-@click.option('-i', '--index', default=0, type=int, help='Address index')
-@click.option('-p', '--password', type=str, help='Root account password')
-def sign(name, address, password, index):
+@_wallet
+@_address
+@_index
+@_password
+@click.option('-t', '--transaction', type=str,
+              help='Unfullfiled transaction json string')
+def fulfill(wallet, password, address, index, transaction):
     try:
-        xprivkey = ks.get_private_key_drv(name, address, index, password)
+        key = ks.get_private_key_drv(wallet, address, index, password)
         tx = fulfill_transaction(
-            json.loads(click.get_binary_stream('stdin').encode()),
-            private_keys=[b58encode(xprivkey.privkey).decode()]
+            json.loads(transaction),
+            private_keys=[b58encode(key.privkey).decode()]
         )
         click.echo(json.dumps(tx))
     # TODO ks.WalletError decorator

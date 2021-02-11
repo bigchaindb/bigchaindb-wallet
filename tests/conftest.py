@@ -107,7 +107,10 @@ def prepared_hello_world_tx():
         'inputs': [{
             'owners_before': ['4gjzAZFZdVVwDYPsQqAnqgyvsjfRZQg8PRfw2CfsZvDn'],
             'fulfills': None,
-            'fulfillment': None
+            'fulfillment': {
+                'public_key': '4gjzAZFZdVVwDYPsQqAnqgyvsjfRZQg8PRfw2CfsZvDn',
+                'type': 'ed25519-sha-256'
+            }
         }],
         'outputs': [{
             'public_keys': ['4gjzAZFZdVVwDYPsQqAnqgyvsjfRZQg8PRfw2CfsZvDn'],
