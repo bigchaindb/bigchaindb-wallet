@@ -39,12 +39,26 @@ _password = click.option(
     default=lambda: os.environ.get('BDBW_PASSWORD')
 )
 
-
 _location = click.option(
     '-L', '--location',
     help=('Keystore file location'),
     default=ks.get_home_path_and_warn
 )
+
+_transaction = click.option(
+    '-t', '--transaction',
+    help='Transaction json string',
+    type=str,
+    required=True
+)
+
+_indent = click.option(
+    '-I', '--indent',
+    help='Indent result',
+    type=bool,
+    is_flag=True
+)
+
 
 
 # CLI
@@ -111,11 +125,11 @@ def init(strength, entropy, mnemonic_language, no_keystore, location,
 @_address
 @_index
 @_password
+@_indent
 @click.option('-A', '--operation',
               type=str, help='Operation CREATE/TRANSFER', required=True)
 @click.option('-A', '--asset', type=str, help='Asset', required=True)
 @click.option('-M', '--metadata', type=str, help='Metadata', default='{}')
-@click.option('-I', '--indent', type=bool, help='Indent result', is_flag=True)
 def prepare(wallet, address, index, password, asset, metadata, indent, operation):
     try:
         if not operation.upper() in ['CREATE', 'TRANSFER']:
@@ -145,8 +159,7 @@ def prepare(wallet, address, index, password, asset, metadata, indent, operation
 @_address
 @_index
 @_password
-@click.option('-t', '--transaction', type=str,
-              help='Unfullfiled transaction json string')
+@_transaction
 def fulfill(wallet, password, address, index, transaction):
     try:
         key = ks.get_private_key_drv(wallet, address, index, password)
@@ -160,5 +173,24 @@ def fulfill(wallet, password, address, index, transaction):
         click.echo(error)
     except json.JSONDecodeError:
         click.echo('Operation aborted during transaction parsing')
+    except Exception:
+        click.echo('Operation aborted: unrecoverable error')
+
+
+@cli.command()
+@_transaction
+@_indent
+@click.option(
+    '-u', '--url',
+    help='BigchaiDB url',
+    type=str,
+    required=True)
+def commit(transaction, url, indent):
+    try:
+        bdb = BigchainDB(url)
+        tx = bdb.transactions.send_commit(transaction)
+        click.echo(
+            json.dumps(tx, indent=4 if indent else None)
+        )
     except Exception:
         click.echo('Operation aborted: unrecoverable error')
