@@ -64,11 +64,4 @@ tests, features and bug fixes are on the way.
 
 ### TODO shortlist
 - Account discovery
-- Public key derivations
-
-  Underling library uses secp256k1 while BigchainDB is using ed25519 Because key
-  size is 32 private keys can be used interchangeably. But major limitation at
-  the moment you can not derive public keys from extended public keys at the
-  moment.  Bip32 style Ed25519 key derivation library has to be implemented to
-  have this feature.
-  
+- Caching
