@@ -4,6 +4,7 @@ import json
 import click
 from bigchaindb_driver.offchain import fulfill_transaction
 from bigchaindb_driver import BigchainDB
+import pickledb
 
 import bigchaindb_wallet.keymanagement as km
 import bigchaindb_wallet.keystore as ks
@@ -192,5 +193,10 @@ def commit(transaction, url, indent):
         click.echo(
             json.dumps(tx, indent=4 if indent else None)
         )
+        cache_location = '{}/{}'.format(ks.get_home_path_and_warn(),
+                                        '.bdbw_cache')
+        db = pickledb.load(cache_location, False)
+        db.set(tx['id'], tx)
+        db.dump()
     except Exception:
         click.echo('Operation aborted: unrecoverable error')

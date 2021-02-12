@@ -16,6 +16,7 @@ setup(
     ],
     install_requires=[
         "Click",
+        "pickledb",
         "PyNaCl",
         "bigchaindb_driver",
         "mnemonic",
@@ -27,6 +28,7 @@ setup(
     tests_require=[
         "hypothesis",
         "pytest",
+        "pytest-httpserver",
         "schema",
     ],
     zip_safe=False,

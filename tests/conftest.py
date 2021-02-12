@@ -4,6 +4,7 @@ import os
 import random
 import string
 
+import pickledb
 import pytest
 
 from types import SimpleNamespace
@@ -108,6 +109,18 @@ def session_wallet(tmp_home_session, default_wallet):
 
 
 @pytest.fixture
+def bdbw_tx_cache_location(tmp_home_session):
+    return tmp_home_session / '.bdbw_cache'
+
+
+@pytest.fixture
+def session_tx_cache_obj(bdbw_tx_cache_location):
+    db = pickledb.load(bdbw_tx_cache_location, False)
+    db.dump()
+    return db
+
+
+@pytest.fixture
 def prepared_hello_world_tx():
     return {
         'inputs': [{
@@ -159,13 +172,9 @@ def fulfilled_hello_world_tx(prepared_hello_world_tx):
 
 
 @pytest.fixture
-def bdb_test_url():
-    return 'https://test.ipdb.io'
-
-
-@pytest.fixture
 def random_fulfilled_tx_gen():
-    def closure(bdb):
+    def closure():
+        bdb = BigchainDB()
         alice = generate_keypair()
         prepared_creation_tx = bdb.transactions.prepare(
             operation='CREATE',

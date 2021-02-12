@@ -9,6 +9,7 @@ from bigchaindb_wallet.keystore import bdbw_derive_account, get_private_key_drv
 from bigchaindb_wallet.keymanagement import ExtendedKey
 import hypothesis.strategies as st
 from hypothesis import given, example, settings
+from werkzeug.wrappers import Response
 
 
 @pytest.mark.parametrize(
@@ -97,10 +98,33 @@ def test_cli_fulfill(
     assert json.loads(result.output) == fulfilled_hello_world_tx
 
 
-def test_cli_commit(random_fulfilled_tx_gen, bdb_test_url, click_runner):
-    bdb = BigchainDB(bdb_test_url)
-    ftx = random_fulfilled_tx_gen(bdb)
+def test_cli_commit(
+        random_fulfilled_tx_gen,
+        click_runner,
+        httpserver,
+        session_tx_cache_obj
+):
+    ftx = random_fulfilled_tx_gen()
+
+    def handler(request):
+        # Werkzeug's Response doesn't have get_json method by default. This why
+        # we need to do a decode-replace-slice dance here:
+        reques_str = request.data.decode().replace('\\', '')[1:-1]
+        assert json.loads(reques_str) == ftx
+        return Response(reques_str)
+
+    httpserver.expect_request(
+        '/api/v1/transactions/',
+        method="POST",
+    ).respond_with_handler(handler)
+
     result = click_runner.invoke(
-        cli.commit, ["--transaction", json.dumps(ftx), "--url", bdb_test_url]
+        cli.commit, ["--transaction", json.dumps(ftx),
+                     "--url", "http://localhost:5000"]
     )
     assert json.loads(result.output) == ftx
+    tx_condition_details = [i['condition']['details'] for i in ftx['outputs']]
+    assert len(tx_condition_details) == 1
+    assert all(i['type'] == 'ed25519-sha-256' for i in tx_condition_details)
+    session_tx_cache_obj._loaddb()  # Reload file
+    assert session_tx_cache_obj.get(ftx['id']) == ftx
