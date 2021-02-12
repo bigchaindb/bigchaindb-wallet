@@ -70,6 +70,7 @@ def cli():
 @cli.command()
 @_password
 @_location
+@_wallet
 @click.option('-s', '--strength', type=int, default=256,
               help=('Seed strength. One of the following '
                     '[128, 160, 192, 224, 256] default is 256'))
@@ -83,35 +84,32 @@ def cli():
               help=('Do not create keystore file. Ouput result to stdout'))
 @click.option('-q', '--quiet', type=bool, is_flag=True,
               help=('Only ouput the resulting mnemonic seed'))
-def init(strength, entropy, mnemonic_language, no_keystore, location,
+def init(wallet, strength, entropy, mnemonic_language, no_keystore, location,
          password, quiet):
     # TODO make OS checks
     # TODO no-keystore and quiet should be mutually exclusive?
     # TODO Sensible errors on bad input
     # MAYBE mutual exclusion option for click
     try:
-        keystore_location = '{}/{}'.format(location,
-                                           ks.DEFAULT_KEYSTORE_FILENAME)
 
         mnemonic_phrase = km.make_mnemonic_phrase(
             strength,
             mnemonic_language,
             bytes.fromhex(entropy) if entropy else None)
-
-        wallet = ks.make_wallet_dict(
+        wallet_dict = ks.make_wallet_dict(
             km.seed_to_extended_key(km.mnemonic_to_seed(mnemonic_phrase)),
-            password)
+            password,
+            name=wallet)
 
+        keystore_location = '{}/{}'.format(location,
+                                           ks.DEFAULT_KEYSTORE_FILENAME)
         if no_keystore:
-            click.echo(ks.wallet_dumps(wallet))
+            click.echo(ks.wallet_dumps(wallet_dict))
             return
-        elif (os.path.isfile(keystore_location)
-              and click.confirm('Keystore exists! Rewrite?')):
-            if not click.confirm('Are you sure?'):
-                click.echo('Operation aborted!')
-                return
+        elif not confirm_file_rewrite(keystore_location, 'Keystore'):
+            return
 
-        ks.wallet_dump(wallet, keystore_location)
+        ks.wallet_dump(wallet_dict, keystore_location)
 
         if quiet:
             click.echo(mnemonic_phrase)
@@ -205,3 +203,99 @@ def commit(transaction, url, indent):
         db.dump()
     except Exception:
         click.echo('Operation aborted: unrecoverable error')
+
+
+@cli.command(name='import')
+@_wallet
+@_password
+@_location
+@click.argument('type', type=str, required=True)
+@click.argument('value', type=(str, str),
+                required=True)
+@click.option('-u', '--url', type=str,
+              help='Import existing transactions from url')
+@click.option('--force', is_flag=True,
+              help='Skip confirmations')
+def import_(wallet, type, value, password, location, url, force):
+    """TYPE is either key or seed\n
+    VALUE is a hex encoded seed or space separated master key and chaincode"""
+    try:
+        if type.lower() not in ['seed', 'key']:
+            click.echo('TYPE must be either either "key" or "seed"')
+            return
+
+        keystore_location = '{}/{}'.format(location,
+                                           ks.DEFAULT_KEYSTORE_FILENAME)
+
+        if (not force
+           and not confirm_file_rewrite(keystore_location, 'Keystore')):
+            return
+
+        if type == 'key':
+            master_key = km.ExtendedKey(*[bytes.fromhex(i) for i in value])
+        elif type == 'seed':
+            # master_key = km.seed_to_extended_key(bytes.fromhex(value))
+            raise ks.WalletError('Not yet implemented\n'
+                                 'Use the "key" import')
+
+        wallet_dict = ks.make_wallet_dict(master_key, password, name=wallet)
+
+        ks.wallet_dump(wallet_dict, keystore_location)
+
+        cache_location = '{}/{}'.format(ks.get_home_path_and_warn(),
+                                        '.bdbw_cache')
+        populate_tx_cache(xkey=master_key,
+                          location=cache_location,
+                          url=url)
+
+        click.echo('Keystore initialized in:\n{}'.format(keystore_location))
+    except ks.WalletError as error:
+        click.echo(error)
+    except Exception:
+        click.echo('Operation aborted: unrecoverable error')
+
+
+# Utils
+GAP_LIMIT = 20
+
+
+def populate_tx_cache(*, xkey, location, url):
+    db = pickledb.load(location, False)
+    bdb = BigchainDB(url)
+    for account in range(GAP_LIMIT):
+        for index in range(GAP_LIMIT):
+            dxk = ks.bdbw_derive_account(
+                xkey,
+                account=account,
+                index=index
+            )
+            outputs = bdb.outputs.get(
+                b58encode(km.privkey_to_pubkey(dxk.privkey)[1:]).decode()
+            )
+            if not outputs:
+                break
+            for output in outputs:
+                txid = output['transaction_id']
+                db.set(txid, bdb.transactions.get(asset_id=txid)[0])
+    db.dump()
+
+
+def confirm_file_rewrite(
+        file_,
+        refered_as,
+        *,
+        doublecheck=True,
+        doublecheck_msg='Are you sure?',
+        cancel_msg='Operation aborted!'
+):
+    if not os.path.isfile(file_):
+        return True
+    if click.confirm('{} exists! Rewrite?'.format(refered_as)):
+        if doublecheck:
+            if click.confirm(doublecheck_msg):
+                return True
+            click.echo(cancel_msg)
+            return False
+        return True
+    click.echo(cancel_msg)
+    return False

@@ -173,9 +173,15 @@ def fulfilled_hello_world_tx(prepared_hello_world_tx):
 
 @pytest.fixture
 def random_fulfilled_tx_gen():
-    def closure():
+    def closure(use_canonical_key=None):
         bdb = BigchainDB()
-        alice = generate_keypair()
+        if use_canonical_key:
+            alice = SimpleNamespace(
+                private_key=b58encode(use_canonical_key[0]).decode(),
+                public_key=b58encode(use_canonical_key[1][1:]).decode()
+            )
+        else:
+            alice = generate_keypair()
         prepared_creation_tx = bdb.transactions.prepare(
             operation='CREATE',
             signers=alice.public_key,

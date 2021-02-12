@@ -67,7 +67,7 @@ def get_master_xprivkey(wallet_dict, wallet_name: str, password: str) -> str:
         raise WalletError('Account {} contains errors'.format(wallet_name))
 
 
-def make_wallet_dict(master_xkey: ExtendedKey, password):
+def make_wallet_dict(master_xkey: ExtendedKey, password, name='default'):
     def _value_encode(val):
         return val.hex()
     master_privkey_crypt, salt = symkey_encrypt(
@@ -75,7 +75,7 @@ def make_wallet_dict(master_xkey: ExtendedKey, password):
         password.encode(),
     )
     return {
-        "default": {
+        name: {
             "chain_code": _value_encode(master_xkey.chaincode),
             "master_pubkey": _value_encode(
                 privkey_to_pubkey(master_xkey.privkey)

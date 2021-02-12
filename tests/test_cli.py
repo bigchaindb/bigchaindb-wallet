@@ -1,12 +1,19 @@
 """CLI Tests"""
-import pytest
 import json
 import random
+import os
+import pytest
 from schema import Schema
 from bigchaindb_driver import BigchainDB
 from bigchaindb_wallet import _cli as cli
-from bigchaindb_wallet.keystore import bdbw_derive_account, get_private_key_drv
-from bigchaindb_wallet.keymanagement import ExtendedKey
+from bigchaindb_wallet.keystore import (
+    BDBW_PATH_TEMPLATE,
+    bdbw_derive_account,
+    get_private_key_drv)
+from bigchaindb_wallet.keymanagement import (
+    ExtendedKey,
+    privkey_to_pubkey,
+    seed_to_extended_key)
 import hypothesis.strategies as st
 from hypothesis import given, example, settings
 from werkzeug.wrappers import Response
@@ -128,3 +135,41 @@ def test_cli_commit(
     assert all(i['type'] == 'ed25519-sha-256' for i in tx_condition_details)
     session_tx_cache_obj._loaddb()  # Reload file
     assert session_tx_cache_obj.get(ftx['id']) == ftx
+
+
+def test_cli_import(
+        random_fulfilled_tx_gen,
+        click_runner,
+        session_tx_cache_obj,
+        default_password,
+        tmp_home
+):
+    bdb = BigchainDB('test.ipdb.io')
+    xkey = seed_to_extended_key(os.urandom(64))
+
+    transactions = {}
+    for account in range(2):
+        for index in range(2):
+            dxk = bdbw_derive_account(
+                xkey,
+                account=account,
+                index=index
+            )
+            ftx = random_fulfilled_tx_gen(
+                use_canonical_key=(dxk.privkey,
+                                   privkey_to_pubkey(dxk.privkey))
+            )
+            result = bdb.transactions.send_commit(ftx)
+            transactions[result['id']] = result
+
+    result = click_runner.invoke(
+        cli.import_, ["key",
+                     xkey.privkey.hex(), xkey.chaincode.hex(),
+                     "--password", default_password,
+                     "--url", "test.ipdb.io",
+                     "--force"]
+    )
+
+    session_tx_cache_obj._loaddb()
+    for id_, tx in transactions.items():
+        assert session_tx_cache_obj.get(id_) == tx  # Reload file
