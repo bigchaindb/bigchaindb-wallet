@@ -8,14 +8,12 @@ import hmac
 import struct
 from collections import namedtuple
 
-from nacl import utils, secret
+from mnemonic import Mnemonic
+from mnemonic.mnemonic import PBKDF2_ROUNDS
+from nacl import secret, utils
 from nacl.pwhash import SCRYPT_SALTBYTES as SALTBYTES
 from nacl.pwhash import kdf_scryptsalsa208sha256 as kdf
 from nacl.signing import SigningKey
-
-from mnemonic import Mnemonic
-from mnemonic.mnemonic import PBKDF2_ROUNDS
-
 
 HARDENED_INDEX = 0x80000000
 

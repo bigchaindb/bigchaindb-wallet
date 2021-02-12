@@ -1,13 +1,12 @@
-import hypothesis.strategies as st
-from hypothesis import given, example, settings
 from functools import reduce
 
-from bigchaindb_wallet.keymanagement import (
-    path_to_indexes,
-    derive_key,
-    privkey_to_pubkey,
-    seed_to_extended_key
-)
+import hypothesis.strategies as st
+from hypothesis import example, given, settings
+
+from bigchaindb_wallet.keymanagement import (derive_key, path_to_indexes,
+                                             privkey_to_pubkey,
+                                             seed_to_extended_key)
+
 
 @given(st.tuples(st.integers(min_value=0, max_value=0xffffffff)))
 def test_path_to_indexes(drv_tree_position):

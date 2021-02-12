@@ -3,18 +3,16 @@ import json
 import os
 import random
 import string
+from collections import namedtuple
+from types import SimpleNamespace
 
 import pickledb
 import pytest
-
-from types import SimpleNamespace
-from schema import Schema, Use
-from collections import namedtuple
-
 from base58 import b58encode
 from bigchaindb_driver import BigchainDB
 from bigchaindb_driver.crypto import generate_keypair
 from click.testing import CliRunner
+from schema import Schema, Use
 
 from bigchaindb_wallet.keystore import BDBW_PATH_TEMPLATE
 

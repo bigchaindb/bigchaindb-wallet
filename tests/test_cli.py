@@ -1,22 +1,21 @@
 """CLI Tests"""
 import json
-import random
 import os
-import pytest
-from schema import Schema
-from bigchaindb_driver import BigchainDB
-from bigchaindb_wallet import _cli as cli
-from bigchaindb_wallet.keystore import (
-    BDBW_PATH_TEMPLATE,
-    bdbw_derive_account,
-    get_private_key_drv)
-from bigchaindb_wallet.keymanagement import (
-    ExtendedKey,
-    privkey_to_pubkey,
-    seed_to_extended_key)
+import random
+
 import hypothesis.strategies as st
-from hypothesis import given, example, settings
+import pytest
+from bigchaindb_driver import BigchainDB
+from hypothesis import example, given, settings
+from schema import Schema
 from werkzeug.wrappers import Response
+
+from bigchaindb_wallet import _cli as cli
+from bigchaindb_wallet.keymanagement import (ExtendedKey, privkey_to_pubkey,
+                                             seed_to_extended_key)
+from bigchaindb_wallet.keystore import (BDBW_PATH_TEMPLATE,
+                                        bdbw_derive_account,
+                                        get_private_key_drv)
 
 
 @pytest.mark.parametrize(

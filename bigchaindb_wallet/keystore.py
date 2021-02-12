@@ -1,19 +1,14 @@
 import json
 import os
 
-from base58 import b58encode, b58decode
+from base58 import b58decode, b58encode
 from bigchaindb_driver.crypto import generate_keypair
 from mnemonic import Mnemonic
 from mnemonic.mnemonic import PBKDF2_ROUNDS
 
-from bigchaindb_wallet.keymanagement import (
-    ExtendedKey,
-    privkey_to_pubkey,
-    symkey_decrypt,
-    symkey_encrypt,
-    derive_from_path
-)
-
+from bigchaindb_wallet.keymanagement import (ExtendedKey, derive_from_path,
+                                             privkey_to_pubkey, symkey_decrypt,
+                                             symkey_encrypt)
 
 BIGCHAINDB_COINTYPE = 822
 BDBW_TREE_INDEX_ROOT = (44, BIGCHAINDB_COINTYPE)

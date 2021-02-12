@@ -1,15 +1,15 @@
 # TODO Disallow empty passwords
-import os
 import json
+import os
+
 import click
-from bigchaindb_driver.offchain import fulfill_transaction
-from bigchaindb_driver import BigchainDB
 import pickledb
+from base58 import b58encode
+from bigchaindb_driver import BigchainDB
+from bigchaindb_driver.offchain import fulfill_transaction
 
 import bigchaindb_wallet.keymanagement as km
 import bigchaindb_wallet.keystore as ks
-from base58 import b58encode
-
 
 # Decoratoers
 _wallet = click.option(

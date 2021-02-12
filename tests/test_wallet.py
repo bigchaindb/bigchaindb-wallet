@@ -1,6 +1,7 @@
 """Test wallet"""
 import pytest
-from bigchaindb_wallet.keymanagement import symkey_encrypt, symkey_decrypt
+
+from bigchaindb_wallet.keymanagement import symkey_decrypt, symkey_encrypt
 from bigchaindb_wallet.keystore import get_master_xprivkey
 
 
