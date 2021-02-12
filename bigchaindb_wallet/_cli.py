@@ -90,25 +90,33 @@ def init(strength, entropy, mnemonic_language, no_keystore, location,
     # TODO Sensible errors on bad input
     # MAYBE mutual exclusion option for click
     try:
+        keystore_location = '{}/{}'.format(location,
+                                           ks.DEFAULT_KEYSTORE_FILENAME)
+
         mnemonic_phrase = km.make_mnemonic_phrase(
             strength,
             mnemonic_language,
             bytes.fromhex(entropy) if entropy else None)
+
         wallet = ks.make_wallet_dict(
             km.seed_to_extended_key(km.mnemonic_to_seed(mnemonic_phrase)),
             password)
+
         if no_keystore:
             click.echo(ks.wallet_dumps(wallet))
             return
+        elif (os.path.isfile(keystore_location)
+              and click.confirm('Keystore exists! Rewrite?')):
+            if not click.confirm('Are you sure?'):
+                click.echo('Operation aborted!')
+                return
 
-        # TODO make OS checks: check whether directory or file exist
-        location = '{}/{}'.format(location,
-                                  ks.DEFAULT_KEYSTORE_FILENAME)
-        ks.wallet_dump(wallet, location)
+        ks.wallet_dump(wallet, keystore_location)
+
         if quiet:
             click.echo(mnemonic_phrase)
         else:
-            click.echo('Keystore initialized in:\n{}'.format(location))
+            click.echo('Keystore initialized in:\n{}'.format(keystore_location))
             click.echo('Your mnemonic phrase is:\n{}\n'
                        'Keep it in a safe place!'.format(mnemonic_phrase))
             # TODO ks.WalletError decorator
