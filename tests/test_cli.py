@@ -52,8 +52,8 @@ def test_cli_init_default(tmp_home, click_runner):
         }).validate(conf_dict)
     assert result.exit_code == 0
     assert result.output.startswith(
-        'Keystore initialized in {}\n'
-        'Your mnemonic phrase is \n'
+        'Keystore initialized in:\n{}\n'
+        'Your mnemonic phrase is:\n'
         .format(conf_location))
 
 

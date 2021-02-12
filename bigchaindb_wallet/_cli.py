@@ -61,7 +61,6 @@ _indent = click.option(
 )
 
 
-
 # CLI
 @click.group()
 def cli():
@@ -70,6 +69,7 @@ def cli():
 
 @cli.command()
 @_password
+@_location
 @click.option('-s', '--strength', type=int, default=256,
               help=('Seed strength. One of the following '
                     '[128, 160, 192, 224, 256] default is 256'))
@@ -83,7 +83,6 @@ def cli():
               help=('Do not create keystore file. Ouput result to stdout'))
 @click.option('-q', '--quiet', type=bool, is_flag=True,
               help=('Only ouput the resulting mnemonic seed'))
-
 def init(strength, entropy, mnemonic_language, no_keystore, location,
          password, quiet):
     # TODO make OS checks
@@ -100,19 +99,17 @@ def init(strength, entropy, mnemonic_language, no_keystore, location,
             password)
         if no_keystore:
             click.echo(ks.wallet_dumps(wallet))
-        else:
-            # TODO make OS checks: ceck wether directory or file
-            if not location:
-                location = '{}/{}'.format(ks.get_home_path_and_warn(),
-                                          ks.DEFAULT_KEYSTORE_FILENAME)
-            else:
-                location = ks.DEFAULT_KEYSTORE_FILENAME
-            ks.wallet_dump(wallet, location)
+            return
+
+        # TODO make OS checks: check whether directory or file exist
+        location = '{}/{}'.format(location,
+                                  ks.DEFAULT_KEYSTORE_FILENAME)
+        ks.wallet_dump(wallet, location)
         if quiet:
             click.echo(mnemonic_phrase)
         else:
-            click.echo('Keystore initialized in {}:'.format(location))
-            click.echo('Your mnemonic phrase is \n{}\n'
+            click.echo('Keystore initialized in:\n{}'.format(location))
+            click.echo('Your mnemonic phrase is:\n{}\n'
                        'Keep it in a safe place!'.format(mnemonic_phrase))
             # TODO ks.WalletError decorator
     except ks.WalletError as error:
