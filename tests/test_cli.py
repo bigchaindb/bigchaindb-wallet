@@ -161,12 +161,13 @@ def test_cli_import(
 
     result = click_runner.invoke(
         cli.import_, ["key",
+
                       xkey.privkey.hex(), xkey.chaincode.hex(),
                       "--password", default_password,
                       "--url", "test.ipdb.io",
                       "--force"]
     )
 
-    session_tx_cache_obj._loaddb()
+    session_tx_cache_obj._loaddb()  # Reload file
     for id_, tx in transactions.items():
-        assert session_tx_cache_obj.get(id_) == tx  # Reload file
+        assert session_tx_cache_obj.get(id_) == tx
