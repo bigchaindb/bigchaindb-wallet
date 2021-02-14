@@ -161,10 +161,10 @@ def test_cli_import(
 
     result = click_runner.invoke(
         cli.import_, ["key",
-                     xkey.privkey.hex(), xkey.chaincode.hex(),
-                     "--password", default_password,
-                     "--url", "test.ipdb.io",
-                     "--force"]
+                      xkey.privkey.hex(), xkey.chaincode.hex(),
+                      "--password", default_password,
+                      "--url", "test.ipdb.io",
+                      "--force"]
     )
 
     session_tx_cache_obj._loaddb()
