@@ -145,8 +145,8 @@ def test_cli_import(
     xkey = seed_to_extended_key(os.urandom(64))
 
     transactions = {}
-    for account in range(2):
-        for index in range(2):
+    for account in range(3):
+        for index in range(3):
             dxk = bdbw_derive_account(
                 xkey,
                 account=account,
