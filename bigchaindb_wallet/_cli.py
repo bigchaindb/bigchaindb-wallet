@@ -192,7 +192,7 @@ def fulfill(wallet, password, address, index, transaction):
 def commit(transaction, url, indent):
     try:
         bdb = BigchainDB(url)
-        tx = bdb.transactions.send_commit(transaction)
+        tx = bdb.transactions.send_commit(json.loads(transaction))
         click.echo(
             json.dumps(tx, indent=4 if indent else None)
         )

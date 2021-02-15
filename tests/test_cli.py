@@ -113,9 +113,7 @@ def test_cli_commit(
     ftx = random_fulfilled_tx_gen()
 
     def handler(request):
-        # Werkzeug's Response doesn't have get_json method by default. This why
-        # we need to do a decode-replace-slice dance here:
-        reques_str = request.data.decode().replace('\\', '')[1:-1]
+        reques_str = request.data.decode()
         assert json.loads(reques_str) == ftx
         return Response(reques_str)
 
