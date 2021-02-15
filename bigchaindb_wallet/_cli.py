@@ -130,7 +130,7 @@ def init(wallet, strength, entropy, mnemonic_language, no_keystore, location,
 @_index
 @_password
 @_indent
-@click.option('-A', '--operation',
+@click.option('-o', '--operation',
               type=str, help='Operation CREATE/TRANSFER', required=True)
 @click.option('-A', '--asset', type=str, help='Asset', required=True)
 @click.option('-M', '--metadata', type=str, help='Metadata', default='{}')
