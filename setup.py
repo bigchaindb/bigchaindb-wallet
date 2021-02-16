@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name="bigchaindb-wallet",
-    version="0.0.0",
+    version="0.0.1",
     author="David Dashyan",
     author_email="mail@dave.li",
     description="Deterministic wallet implementation for BigchainDB",
