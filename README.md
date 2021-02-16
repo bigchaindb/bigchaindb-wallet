@@ -15,7 +15,7 @@ provides options to derive account and index.
 Derivation path has following format: m/44'/822'/account'/0'/address'.  Where
 822 is BigchainDB coin type.
 
-As BigchainDB uses Ed25519 curve only hardened private key derivations are
+As BigchainDB uses Ed25519 curve, only hardened private key derivations are
 supported.  Public key derivations do not work.  Key derivations are implemented
 according to SLIP-10.
 
