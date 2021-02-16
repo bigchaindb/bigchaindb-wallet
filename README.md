@@ -9,7 +9,7 @@ stored in '.bdbw_keystore' file, prepare, sign and send transactions.  Upon key
 creation user is provided with mnemonic phrase to record and store it in a safe
 please.
 
-Keystone can have multiple "wallets" the default wallet name is "default".  CLI
+Keystore can have multiple "wallets" the default wallet name is "default".  CLI
 provides options to derive account and index.
 
 Derivation path has following format: m/44'/822'/account'/0'/address'.  Where
