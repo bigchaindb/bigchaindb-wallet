@@ -12,6 +12,7 @@ setup(
     packages=["bigchaindb_wallet"],
     py_modules=[
         "bigchaindb_wallet.keystore",
+        "bigchaindb_wallet.keymanagement",
         "bigchaindb_wallet._cli"
     ],
     install_requires=[
