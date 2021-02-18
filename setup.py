@@ -5,7 +5,7 @@ setup(
     name="bigchaindb-wallet",
     version="0.0.1",
     author="David Dashyan",
-    author_email="mail@dave.li",
+    author_email="mail@davie.li",
     description="Deterministic wallet implementation for BigchainDB",
     long_description=open("README.md").read(),
     url="https://github.com/bigchaindb/bigchaindb_wallet",
